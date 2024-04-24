@@ -8,7 +8,7 @@ This repository provides a Python library for making decisions based on the prob
 
 1. Clone the repository:
     ```
-    git clone https://github.com/your-username/your-repo.git
+    git clone https://github.com/Netajam/Decision-Optimizer.git
     ```
 
 2. Install the required dependencies:
