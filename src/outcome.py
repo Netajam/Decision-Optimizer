@@ -1,9 +1,10 @@
 import numpy as np
 
+
 class Outcome:
-    def __init__(self, name, decision, events, combine_formula, utility_function):
+    def __init__(self, name, decision_name, events, combine_formula, utility_function):
         self.name = name
-        self.decision = decision  # This associates an Outcome with a Decision
+        self.decision_name = decision_name
         self.events = events
         self.combine_formula = combine_formula
         self.utility_function = utility_function

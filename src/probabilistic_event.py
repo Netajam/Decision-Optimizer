@@ -19,14 +19,13 @@ class ProbabilisticEvent:
             elif self.distribution_type == 'exponential':
                 samples = expon.rvs(scale=self.params['scale'], size=n)
             elif self.distribution_type == 'binomial':
-                samples = binom.rvs(self.params['n'], self.params['p'], size=n)
+                samples = binom.rvs(1, self.params['p'], size=n)  # Change this line
             elif self.distribution_type == 'poisson':
                 samples = poisson.rvs(self.params['mu'], size=n)
             self._cached_samples = samples
-
         return 1 - samples if self.complement else samples
-        
+
     def complementary_event(self, complement_name=None):
         if complement_name is None:
-            complement_name = "N"+ self.name
+            complement_name = "Not " + self.name
         return ProbabilisticEvent(complement_name, self.distribution_type, self.params, complement=not self.complement)

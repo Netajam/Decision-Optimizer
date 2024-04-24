@@ -1,9 +1,9 @@
 import sys
 sys.path.append("../src")
-from src.probabilistic_events import ProbabilisticEvent
+from src.probabilistic_event import ProbabilisticEvent
 from src.visualization import plot_distribution, plot_utility_distribution, plot_utility_distribution_decision, plot_probability_distribution
-from src.decisions import Decision
-from src.outcomes import Outcome
+from src.decision import Decision
+from src.outcome import Outcome
 from src.decision_evaluation import evaluate_decision
 import numpy as np
 import time

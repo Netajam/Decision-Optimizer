@@ -105,21 +105,53 @@ def plot_utility_distribution(samples, utility_function, title):
 
 
 
-def plot_utility_distribution_decision(final_utilities, weighted_average_utility, all_utility_samples, title):
-    plt.figure()
-    
+def plot_decision_utility_distribution(decision, utility_samples_list, title, colors=None, fig_size=(10, 6)):
+    """
+    Plot the utility distribution for each outcome of a decision and the overall decision utility.
 
-    # Plot utility distribution for each outcome
-    for idx, utility_samples in enumerate(all_utility_samples):
-      
-        sns.kdeplot(utility_samples, label=f'Outcome KDE {idx + 1}')
-    
-    plt.hist(final_utilities, bins=50, density=True, alpha=0.5, label=f'Decision Utility')
-    
-    plt.title(f'Utility Distributions for {title}', color='white')
-    plt.xlabel('Utility', color='white')
-    plt.ylabel('Density', color='white')
-    plt.tick_params(colors='white')
-    plt.legend()
+    Args:
+        decision (Decision): The decision object containing the outcomes.
+        utility_samples_list (list): A list of utility sample arrays for each outcome.
+        title (str): The title of the plot.
+        colors (list, optional): A list of colors for each outcome. If not provided, default colors will be used.
+        fig_size (tuple, optional): The size of the figure in inches (width, height). Default is (10, 6).
+
+    Returns:
+        None
+    """
+    plt.figure(figsize=fig_size)
+    if colors is None:
+        colors = ['C{}'.format(i) for i in range(len(utility_samples_list))]
+
+    for i, (outcome, utility_samples, color) in enumerate(zip(decision.get_outcomes(), utility_samples_list, colors)):
+        sns.kdeplot(utility_samples, label=f'{outcome.name}', color=color, linewidth=2, alpha=0.7, linestyle='--')
+
+        plt.axvline(np.mean(utility_samples), color=color, linestyle='--', linewidth=1.5,
+                    label=f'{outcome.name} (Mean)')
+
+    overall_utility_samples = np.concatenate(utility_samples_list)
+
+    # Plot the overall decision utility as a curve with a plain line
+    sns.kdeplot(overall_utility_samples, label='Overall Decision Utility', color='black', linewidth=3, alpha=0.7)
+
+    # Plot the overall decision utility as a bar chart
+    plt.hist(overall_utility_samples, bins=50, density=True, alpha=0.5, label='_nolegend_')
+
+    plt.title(title, fontsize=16, fontweight='bold')
+    plt.xlabel('Utility', fontsize=12)
+    plt.ylabel('Density', fontsize=12)
+    plt.tick_params(labelsize=10)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(fontsize=10, loc='upper right', bbox_to_anchor=(1.25, 1))
+
+    x_min, x_max = np.min(overall_utility_samples), np.max(overall_utility_samples)
+    x_range = x_max - x_min
+    plt.xlim(x_min - 0.1 * x_range, x_max + 0.1 * x_range)
+
+    y_max = plt.ylim()[1]
+    plt.ylim(0, y_max * 1.1)
+
+    plt.tight_layout()
     plt.show()
-    print_statistics(final_utilities, f'Decision Utility for {title}')
+
+    print_statistics(overall_utility_samples, 'Overall Decision Utility')
