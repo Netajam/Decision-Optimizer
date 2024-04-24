@@ -1,37 +1,50 @@
 import csv
-from .probabilistic_event import ProbabilisticEvent
-from .decision import Decision
-from .outcome import Outcome
+import ast
+import numpy as np
+from src.decision import Decision
+from src.outcome import Outcome
+from src.probabilistic_event import ProbabilisticEvent
 
-def load_decision_data(file_path, n_samples=10000):
+def create_function_from_string(func_str):
+    """
+    Safely create a function from a string representation.
+    Uses a restricted environment to evaluate the function, including only the 'np' module for numpy access.
+    """
+    try:
+        # Define a restricted global environment
+        safe_globals = {'np': np}
+        return eval(func_str, {"__builtins__": None}, safe_globals)
+    except SyntaxError as e:
+        raise ValueError(f"Error creating function from string: {func_str}") from e
+
+def load_decision_data(file_path):
     decisions = {}
-    with open(file_path, 'r') as file:
+    events_by_outcome = {}
+
+    with open(file_path, mode='r', newline='', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for row in reader:
             decision_name = row['Decision']
+            if decision_name not in decisions:
+                decisions[decision_name] = Decision(decision_name)
+
             outcome_name = row['Outcome']
             event_name = row['Event']
             event_type = row['Event_Type']
-            event_params = eval(row['Event_Params'])
-            utility_function = eval(row['Utility_Function'])
-            combination_formula_str = row['Combination_Formula']
-            
-            if decision_name not in decisions:
-                decisions[decision_name] = Decision(decision_name)
-            
+            event_params = ast.literal_eval(row['Event_Params'])
             event = ProbabilisticEvent(event_name, event_type, event_params)
             
-            # Generate samples for the event
-            event_samples = event.sample(n_samples)
-            
-            # Create the lambda function dynamically
-            combination_formula = eval(f"lambda samples: {combination_formula_str}")
-            
-            # Combine the event samples using the combination formula
-            combined_samples = combination_formula(event_samples)
-            
-            outcome = Outcome(outcome_name, decisions[decision_name], [event], combined_samples, utility_function)
-            decisions[decision_name].add_outcome(outcome)
-    
-    return list(decisions.values())
+            # Group events by outcome
+            outcome_key = (decision_name, outcome_name)
+            if outcome_key not in events_by_outcome:
+                events_by_outcome[outcome_key] = []
+            events_by_outcome[outcome_key].append(event)
 
+    # Create outcomes with their associated events
+    for (decision_name, outcome_name), events in events_by_outcome.items():
+        combination_formula = create_function_from_string(row['Combination_Formula'])
+        utility_function = create_function_from_string(row['Utility_Function'])
+        outcome = Outcome(outcome_name, decisions[decision_name], events, combination_formula, utility_function)
+        decisions[decision_name].add_outcome(outcome)
+
+    return list(decisions.values())
