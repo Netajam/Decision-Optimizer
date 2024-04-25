@@ -3,7 +3,7 @@ import ast
 import numpy as np
 from src.decision import Decision
 from src.outcome import Outcome
-from src.probabilistic_event import ProbabilisticEvent
+from src.event import Event
 
 def create_function_from_string(func_str):
     """
@@ -17,34 +17,39 @@ def create_function_from_string(func_str):
     except SyntaxError as e:
         raise ValueError(f"Error creating function from string: {func_str}") from e
 
-def load_decision_data(file_path):
+def load_decision_data(events_file, outcomes_file, decisions_file):
+    events = {}
+    outcomes = {}
     decisions = {}
-    events_by_outcome = {}
 
-    with open(file_path, mode='r', newline='', encoding='utf-8') as file:
+    # Load events
+    with open(events_file, mode='r', newline='', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            decision_name = row['Decision']
-            if decision_name not in decisions:
-                decisions[decision_name] = Decision(decision_name)
+            event_id = row['Event ID']
+            event_type = row['Event Type']
+            event_params = ast.literal_eval(row['Event Params'])
+            utility_function = create_function_from_string(row['Utility Function'])
+            events[event_id] = Event(event_id, event_type, event_params, utility_function)
 
-            outcome_name = row['Outcome']
-            event_name = row['Event']
-            event_type = row['Event_Type']
-            event_params = ast.literal_eval(row['Event_Params'])
-            event = ProbabilisticEvent(event_name, event_type, event_params)
-            
-            # Group events by outcome
-            outcome_key = (decision_name, outcome_name)
-            if outcome_key not in events_by_outcome:
-                events_by_outcome[outcome_key] = []
-            events_by_outcome[outcome_key].append(event)
+    # Load outcomes
+    with open(outcomes_file, mode='r', newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader: 
+            outcome_id = row['Outcome ID']
+            event_ids = row['Event IDs'].split(';')
+            combination_formula = create_function_from_string(row['Combination Formula'])
+            outcome_events = [events[event_id] for event_id in event_ids]
+            outcomes[outcome_id] = Outcome(outcome_id, None, outcome_events, combination_formula)
 
-    # Create outcomes with their associated events
-    for (decision_name, outcome_name), events in events_by_outcome.items():
-        combination_formula = create_function_from_string(row['Combination_Formula'])
-        utility_function = create_function_from_string(row['Utility_Function'])
-        outcome = Outcome(outcome_name, decisions[decision_name], events, combination_formula, utility_function)
-        decisions[decision_name].add_outcome(outcome)
+    # Load decisions
+    with open(decisions_file, mode='r', newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            decision_id = row['Decision ID']
+            outcome_ids = row['Outcome IDs'].split(';')
+            decision_outcomes = [outcomes[outcome_id] for outcome_id in outcome_ids]
+            print(decision_outcomes)
+            decisions[decision_id] = Decision(decision_id, decision_outcomes)
 
     return list(decisions.values())

@@ -1,0 +1,4 @@
+Outcome ID,Outcome Name,Event IDs,Combination Formula
+O1,Beach Vacation,E1;E2,"lambda e1, e2: e1 * e2"
+O2,City Tour,E3;E4,"lambda e3, e4: e3 * e4"
+O3,Mountain Retreat,E5;E6,"lambda e5, e6: e5 * e6"

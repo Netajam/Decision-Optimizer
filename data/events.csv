@@ -1,0 +1,7 @@
+Event ID,Event Type,Event Params,Utility Function
+E1,normal,"{'mean': 0.7, 'std': 0.1}","lambda x: x * 100"
+E2,uniform,"{'start': 0.5, 'end': 0.8}","lambda x: x * 100"
+E3,uniform,"{'start': 0.5, 'end': 0.8}","lambda x: x * 80"
+E4,binomial,"{'n': 10, 'p': 0.6}","lambda x: x * 80"
+E5,normal,"{'mean': 0.7, 'std': 0.1}","lambda x: x * 120"
+E6,binomial,"{'n': 10, 'p': 0.6}","lambda x: x * 120"
