@@ -1,8 +1,7 @@
 class Decision:
-    def __init__(self, name):
+    def __init__(self, name, outcomes=None):
         self.name = name
-        self.outcomes = []
-
+        self.outcomes = outcomes if outcomes is not None else []
 
     def add_outcome(self, outcome):
         self.outcomes.append(outcome)

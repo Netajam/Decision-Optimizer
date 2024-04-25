@@ -1,7 +1,0 @@
-Decision,Outcome,Event,Event_Type,Event_Params,Utility_Function,Combination_Formula
-Vacation Destination,Beach Vacation,Good Weather,normal,"{'mean': 0.7, 'std': 0.1}","lambda x: x * 100","lambda x, y: x * y"
-Vacation Destination,Beach Vacation,Affordable Prices,uniform,"{'start': 0.5, 'end': 0.8}","lambda x: x * 100","lambda x, y: x * y"
-Vacation Destination,City Tour,Affordable Prices,uniform,"{'start': 0.5, 'end': 0.8}","lambda x: x * 80","lambda x, y: x * y"
-Vacation Destination,City Tour,Interesting Activities,binomial,"{'n': 10, 'p': 0.6}","lambda x: x * 80","lambda x, y: x * y"
-Vacation Destination,Mountain Retreat,Good Weather,normal,"{'mean': 0.7, 'std': 0.1}","lambda x: x * 120","lambda x, y: x * y"
-Vacation Destination,Mountain Retreat,Interesting Activities,binomial,"{'n': 10, 'p': 0.6}","lambda x: x * 120","lambda x, y: x * y"

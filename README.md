@@ -20,16 +20,16 @@ This repository provides a Python library for making decisions based on the prob
 
 1. Import the necessary modules from the `src` package:
     ```python
-    from src.probabilistic_events import ProbabilisticEvent
+    from src.probabilistic_events import Event
     from src.visualization import plot_distribution, plot_utility_distribution, plot_utility_distribution_decision, plot_probability_distribution
     from src.decisions import Decision
     from src.outcomes import Outcome
     from src.decision_evaluation import evaluate_decision
     ```
 
-2. Define probabilistic events using the `ProbabilisticEvent` class:
+2. Define probabilistic events using the `Event` class:
     ```python
-    E1 = ProbabilisticEvent("E1", "normal", {'mean': 0.3, 'std': 0.1})
+    E1 = Event("E1", "normal", {'mean': 0.3, 'std': 0.1})
     ```
 
 3. Create decisions using the `Decision` class:

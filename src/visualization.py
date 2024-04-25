@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import cumfreq
 import seaborn as sns
+from scipy.stats import gaussian_kde
 
 def print_statistics(samples, label):
     print(f"Statistics for {label}:")
@@ -35,6 +36,50 @@ def plot_distribution(samples, title):
     plt.show()
     print_statistics(samples, title)
 
+
+def plot_distribution_event(event):
+    fig, ax1 = plt.subplots()
+
+    # Plot the histogram of the samples to get the PDF
+    n, bins, patches = ax1.hist(event.samples, bins=50, density=True, alpha=0.75, label='Sample PDF', color='blue')
+
+    # Calculate bin midpoints
+    bin_midpoints = (bins[:-1] + bins[1:]) / 2
+
+    # Calculate utilities for each bin midpoint
+    utility_values = event.utility_function(bin_midpoints)
+
+    # Adjust utility values by multiplying by the density (PDF) at each midpoint
+    adjusted_utilities = utility_values * n  # n is the density (height of PDF at each bin)
+
+    # Plot the CDF
+    counts, bin_edges = np.histogram(event.samples, bins=bins, density=True)
+    cdf = np.cumsum(counts) * np.diff(bin_edges)
+    ax2 = ax1.twinx()
+    ax2.plot(bin_edges[1:], cdf, 'r-', label='Sample CDF')
+    ax2.set_ylabel('Cumulative Distribution Function')
+
+    # Plot the transformed utility curve
+    ax3 = ax1.twinx()
+    ax3.plot(bin_midpoints, adjusted_utilities, 'g-', label='Transformed Utility Curve')
+    ax3.set_ylabel('Transformed Utility Values')
+
+    # Adjust the position of the third y-axis
+    ax3.spines["right"].set_position(("axes", 1.2))
+
+    # Labels and title
+    ax1.set_xlabel('Sample Values')
+    ax1.set_ylabel('Probability Density')
+    ax1.set_title(f'Analysis of {event.name}: PDF, CDF, and Transformed Utility')
+
+    # Legend handling
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    lines3, labels3 = ax3.get_legend_handles_labels()
+    ax1.legend(lines + lines2 + lines3, labels + labels2 + labels3, loc='upper left')
+
+    plt.show()
+
 def plot_probability_distribution(samples, title):
     fig, ax1 = plt.subplots()
 
@@ -63,7 +108,49 @@ def plot_probability_distribution(samples, title):
     plt.grid(True)
     plt.show()
 
+
+
+def plot_utility_distribution_outcome(outcome):
+    utility_samples = outcome.utilities
+    title = outcome.name
+    plt.figure()
+    n, bins, patches = plt.hist(utility_samples, bins=50, density=True, alpha=0.5, label=f'Utility of {title}')
+
+    max_height = max(n)  # Find the maximum height of the histogram
+
+    # Define a scale factor for placing text to avoid overlapping with the histogram
+    scale_factor = max_height * 0.1
+
+    # Plot Mean
+    mean_val = outcome.expected_utility
+    plt.axvline(mean_val, color='r', linestyle='--')
+    plt.text(mean_val, max_height + scale_factor, f'Mean: {mean_val:.2f}', rotation=90, verticalalignment='bottom', color='red')
     
+    # Plot Median
+    median_val = np.median(utility_samples)
+    plt.axvline(median_val, color='g', linestyle='--')
+    plt.text(median_val, max_height + scale_factor * 2, f'Median: {median_val:.2f}', rotation=90, verticalalignment='bottom', color='green')
+
+    # Plot Standard Deviation
+    std_dev = np.std(utility_samples)
+    plt.axvline(mean_val - std_dev, color='b', linestyle='--')
+    plt.axvline(mean_val + std_dev, color='b', linestyle='--')
+    plt.text(mean_val + std_dev, max_height + scale_factor * 3, f'Std Dev: {std_dev:.2f}', rotation=90, verticalalignment='bottom', color='blue')
+
+    # Plot Quartiles (25th and 75th percentile)
+    q25, q75 = np.percentile(utility_samples, [25, 75])
+    plt.axvline(q25, color='y', linestyle='--')
+    plt.axvline(q75, color='y', linestyle='--')
+    plt.text(q25, max_height + scale_factor * 4, f'25th: {q25:.2f}', rotation=90, verticalalignment='bottom', color='yellow')
+    plt.text(q75, max_height + scale_factor * 5, f'75th: {q75:.2f}', rotation=90, verticalalignment='bottom', color='yellow')
+    
+    plt.title('Utility Distribution for ' + title)
+    plt.xlabel('Utility')
+    plt.ylabel('Density')
+    plt.legend()
+    plt.ylim(0, max_height + scale_factor * 6)  # Adjust y-limit to fit annotations
+    plt.show()
+    print_statistics(utility_samples, f'Utility of {title}')
 
 
 def plot_utility_distribution(samples, utility_function, title):
@@ -155,3 +242,31 @@ def plot_decision_utility_distribution(decision, utility_samples_list, title, co
     plt.show()
 
     print_statistics(overall_utility_samples, 'Overall Decision Utility')
+
+def plot_samples_and_utilities(event):
+    # Extract samples and utilities
+    samples = event.samples
+    utilities = event.utilities
+    
+    # Create figure and first axis for samples
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+    
+    # Histogram for samples
+    color_samples = 'tab:blue'
+    ax1.hist(samples, bins=50, alpha=0.6, color=color_samples, density=True, label='Samples Histogram')
+    ax1.set_xlabel('Value')
+    ax1.set_ylabel('Density of Samples', color=color_samples)
+    ax1.tick_params(axis='y', labelcolor=color_samples)
+    
+    # Create a second axis for utilities
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    color_utilities = 'tab:red'
+    ax2.hist(utilities, bins=50, alpha=0.6, color=color_utilities, density=True, label='Utilities Histogram')
+    ax2.set_ylabel('Density of Utilities', color=color_utilities)
+    ax2.tick_params(axis='y', labelcolor=color_utilities)
+    
+    # Adding titles and legends
+    plt.title(f'Distribution and Utility for {event.name}')
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    fig.legend(loc='upper right', bbox_to_anchor=(1,1), bbox_transform=ax1.transAxes)
+    plt.show()
